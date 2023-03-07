@@ -8,11 +8,11 @@ const Posts = ({ user }) => {
 
   return (
     <>
-      <div className='flex z-30 bg-white md:ml-0.5  fixed right-0 md:left-52 sm:left-0 left-0'>
+      <div className='flex z-30 bg-white md:ml-0.5  fixed md:top-0 sm:top-15 right-0 md:left-52 sm:left-0 left-0'>
         <Navbar
           searchTerm={searchTerm}
           setSearchTerm={setSearchTerm}
-          user={user && user}
+          user={user}
         />
       </div>
 

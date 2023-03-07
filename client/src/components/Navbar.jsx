@@ -7,7 +7,7 @@ const Navbar = ({ user, searchTerm, setSearchTerm }) => {
 
   return (
     <div
-      className='flex gap-2 md:gap-5 w-full p-5 pb-3'
+      className='flex gap-2 md:gap-5 w-full p-5'
       style={{ boxShadow: '0 2px 2px -1px rgba(0, 0, 0, 0.05)' }}
     >
       <div className='flex justify-start items-center w-full px-2 rounded-md bg-gray-100 border-none outline-none focus-within:shadow-sm'>
@@ -30,9 +30,9 @@ const Navbar = ({ user, searchTerm, setSearchTerm }) => {
           <IoMdAdd />
         </Link>
 
-        <Link to={`user_profile/${user._id}`} className='hidden md:block'>
+        <Link to={`user_profile/${user?._id}`} className='hidden md:block'>
           <img
-            src={user.image}
+            src={user?.image}
             alt='user-pic'
             referrerPolicy='no-referrer'
             className='w-12 h-10 rounded-full shadow-sm '

@@ -34,6 +34,8 @@ const PostDetail = ({ user }) => {
     }
   };
 
+  console.log(postDetail);
+
   useEffect(() => {
     fetchPostDetails();
   }, [postId]); // eslint-disable-line react-hooks/exhaustive-deps

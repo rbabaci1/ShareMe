@@ -43,7 +43,7 @@ const Home = () => {
 
         {/* Mobile sidebar */}
         <div className='flex md:hidden flex-row'>
-          <div className='p-2 bg-white w-full flex flex-row justify-between items-center shadow-md'>
+          <div className='p-2 bg-white w-full flex flex-row justify-between h-15 items-center shadow-md'>
             <HiMenu
               fontSize={40}
               className='cursor-pointer'
