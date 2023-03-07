@@ -1,15 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
 
 import { client } from '../client';
 import { feedQuery, searchQuery } from '../utils/data';
 import MasonryLayout from './MasonryLayout';
 import Spinner from './Spinner';
+import { setPosts } from '../state';
 
 const Feed = () => {
-  const [posts, setPosts] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const dispatch = useDispatch();
   const { categoryId } = useParams();
+  const [loading, setLoading] = useState(false);
+
   const ideaName = categoryId || 'new';
 
   useEffect(() => {
@@ -18,14 +21,14 @@ const Feed = () => {
       const query = searchQuery(categoryId);
 
       client.fetch(query).then(data => {
-        setPosts(data);
+        dispatch(setPosts(data));
         setLoading(false);
       });
     } else {
       setLoading(true);
-
       client.fetch(feedQuery).then(data => {
-        setPosts(data);
+        dispatch(setPosts(data));
+
         setLoading(false);
       });
     }
@@ -36,11 +39,7 @@ const Feed = () => {
   } else {
     return (
       <div className='mt-24'>
-        {posts.length ? (
-          <MasonryLayout posts={posts} />
-        ) : (
-          <h1 className='text-center text-2xl'>No Created Posts Found!</h1>
-        )}
+        <MasonryLayout />
       </div>
     );
   }

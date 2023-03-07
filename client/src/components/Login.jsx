@@ -3,13 +3,16 @@ import GoogleLogin from 'react-google-login';
 import { useNavigate } from 'react-router-dom';
 import { FcGoogle } from 'react-icons/fc';
 import { gapi } from 'gapi-script';
+import { useDispatch } from 'react-redux';
 
 import shareMeVideo from '../assets/share.mp4';
 import logo from '../assets/logowhite.png';
 import { client } from '../client';
+import { setLogin } from '../state';
 
 const Login = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   useEffect(() => {
     gapi.load('client:auth2', () => {
@@ -19,8 +22,6 @@ const Login = () => {
 
   const responseGoogle = response => {
     const user = response.profileObj;
-
-    localStorage.setItem('user', JSON.stringify(user));
     const { name, googleId, imageUrl } = user;
 
     const document = {
@@ -31,6 +32,11 @@ const Login = () => {
     };
 
     client.createIfNotExists(document).then(() => {
+      dispatch(
+        setLogin({
+          user,
+        })
+      );
       navigate('/', { replace: true });
     });
   };

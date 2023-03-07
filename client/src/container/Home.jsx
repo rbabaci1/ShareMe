@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { HiMenu } from 'react-icons/hi';
 import { AiFillCloseCircle } from 'react-icons/ai';
 import { Link, Route, Routes } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 
 import { Sidebar, UserProfile } from '../components';
 import { userQuery } from '../utils/data';
@@ -9,14 +10,13 @@ import { client } from '../client';
 import Posts from './Posts';
 import logo from '../assets/logo.png';
 import Spinner from '../components/Spinner';
-import { fetchUser } from '../utils/fetchUser';
 
 const Home = () => {
   const [toggleSidebar, setToggleSidebar] = useState(false);
   const [user, setUser] = useState(null);
   const scrollRef = useRef(null);
 
-  const User = fetchUser();
+  const User = useSelector(state => state.user);
 
   useEffect(() => {
     const userId = User?.googleId;

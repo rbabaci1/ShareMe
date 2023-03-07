@@ -1,4 +1,5 @@
 import React from 'react';
+import { useSelector } from 'react-redux';
 import Masonry from 'react-masonry-css';
 import Post from './Post';
 
@@ -11,15 +12,21 @@ const breakpointColumnsObj = {
   500: 1,
 };
 
-const MasonryLayout = ({ posts }) => (
-  <Masonry
-    className='flex animate-slide-fwd mt-8'
-    breakpointCols={breakpointColumnsObj}
-  >
-    {posts.map(post => (
-      <Post key={post._id} post={post} className='w-max' />
-    ))}
-  </Masonry>
-);
+const MasonryLayout = () => {
+  const posts = useSelector(state => state.posts);
+
+  return posts?.length ? (
+    <Masonry
+      className='flex animate-slide-fwd mt-8'
+      breakpointCols={breakpointColumnsObj}
+    >
+      {posts.map(post => (
+        <Post key={post._id} post={post} className='w-max' />
+      ))}
+    </Masonry>
+  ) : (
+    <h1 className='text-center text-2xl'>No Created Posts Found!</h1>
+  );
+};
 
 export default MasonryLayout;

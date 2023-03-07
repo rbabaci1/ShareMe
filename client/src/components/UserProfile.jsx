@@ -11,7 +11,8 @@ import {
 import { client } from '../client';
 import MasonryLayout from './MasonryLayout';
 import Spinner from './Spinner';
-import { fetchUser } from '../utils/fetchUser';
+import { useSelector, useDispatch } from 'react-redux';
+import { setLogout } from '../state';
 
 const activeBtnStyles =
   'bg-red-500 text-white font-bold p-2 rounded-full w-20 outline-none';
@@ -26,10 +27,10 @@ const UserProfile = () => {
   const [text, setText] = useState('Created');
   const [activeBtn, setActiveBtn] = useState('created');
 
-  const { userId } = useParams();
   const navigate = useNavigate();
-
-  const User = fetchUser();
+  const dispatch = useDispatch();
+  const { userId } = useParams();
+  const User = useSelector(state => state.user);
 
   useEffect(() => {
     const query = userQuery(userId);
@@ -56,7 +57,7 @@ const UserProfile = () => {
   }, [text, userId]);
 
   const logout = () => {
-    localStorage.clear();
+    dispatch(setLogout());
 
     navigate('/login');
   };
@@ -85,7 +86,7 @@ const UserProfile = () => {
           </h1>
 
           <div className='absolute top-0 z-1 right-0 p-2'>
-            {userId === User.googleId && (
+            {userId === User?.googleId && (
               <GoogleLogout
                 clientId={`${process.env.REACT_APP_GOOGLE_API_TOKEN}`}
                 render={renderProps => (
