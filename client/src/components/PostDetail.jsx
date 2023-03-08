@@ -8,13 +8,15 @@ import { client, urlFor } from '../client';
 import MasonryLayout from './MasonryLayout';
 import { relatedPostsQuery, postDetailQuery } from '../utils/data';
 import Spinner from './Spinner';
+import { useSelector } from 'react-redux';
 
-const PostDetail = ({ user }) => {
+const PostDetail = () => {
+  const { postId } = useParams();
+  const User = useSelector(state => state.user);
   const [posts, setPosts] = useState(null);
   const [postDetail, setPostDetail] = useState(null);
   const [comment, setComment] = useState('');
   const [addingComment, setAddingComment] = useState(false);
-  const { postId } = useParams();
 
   const fetchPostDetails = () => {
     let query = postDetailQuery(postId);
@@ -49,7 +51,7 @@ const PostDetail = ({ user }) => {
           {
             comment,
             _key: uuidv4(),
-            postedBy: { _type: 'postedBy', _ref: user._id },
+            postedBy: { _type: 'postedBy', _ref: User?._id },
           },
         ])
         .commit()
@@ -151,9 +153,9 @@ const PostDetail = ({ user }) => {
             </div>
 
             <div className='flex flex-wrap mt-6 gap-3'>
-              <Link to={`/user_profile/${user._id}`}>
+              <Link to={`/user_profile/${User?._id}`}>
                 <img
-                  src={user?.image}
+                  src={User?.image}
                   className='w-10 h-10 rounded-full cursor-pointer'
                   alt='user-profile'
                 />

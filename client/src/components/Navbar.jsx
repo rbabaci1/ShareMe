@@ -1,9 +1,11 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { IoMdAdd, IoMdSearch } from 'react-icons/io';
+import { useSelector } from 'react-redux';
 
-const Navbar = ({ user, searchTerm, setSearchTerm }) => {
+const Navbar = ({ searchTerm, setSearchTerm }) => {
   const navigate = useNavigate();
+  const User = useSelector(state => state.user);
 
   return (
     <div
@@ -30,9 +32,9 @@ const Navbar = ({ user, searchTerm, setSearchTerm }) => {
           <IoMdAdd />
         </Link>
 
-        <Link to={`user_profile/${user?._id}`} className='hidden md:block'>
+        <Link to={`user_profile/${User?.googleId}`} className='hidden md:block'>
           <img
-            src={user?.image}
+            src={User?.image}
             alt='user-pic'
             referrerPolicy='no-referrer'
             className='w-12 h-10 rounded-full shadow-sm '

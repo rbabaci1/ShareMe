@@ -30,7 +30,7 @@ const UserProfile = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { userId } = useParams();
-  const User = useSelector(state => state.user);
+  const loggedInUser = useSelector(state => state.user);
 
   useEffect(() => {
     const query = userQuery(userId);
@@ -86,7 +86,7 @@ const UserProfile = () => {
           </h1>
 
           <div className='absolute top-0 z-1 right-0 p-2'>
-            {userId === User?.googleId && (
+            {userId === loggedInUser?.googleId && (
               <GoogleLogout
                 clientId={`${process.env.REACT_APP_GOOGLE_API_TOKEN}`}
                 render={renderProps => (
@@ -107,31 +107,38 @@ const UserProfile = () => {
         </div>
 
         <div className='text-center mb-7'>
-          <button
-            type='button'
-            onClick={e => {
-              setText(e.target.textContent);
-              setActiveBtn('created');
-            }}
-            className={`${
-              activeBtn === 'created' ? activeBtnStyles : notActiveBtnStyles
-            }`}
-          >
-            Created
-          </button>
-
-          <button
-            type='button'
-            onClick={e => {
-              setText(e.target.textContent);
-              setActiveBtn('saved');
-            }}
-            className={`${
-              activeBtn === 'saved' ? activeBtnStyles : notActiveBtnStyles
-            }`}
-          >
-            Saved
-          </button>
+          {userId === loggedInUser?.googleId ? (
+            <>
+              <button
+                type='button'
+                onClick={e => {
+                  setText(e.target.textContent);
+                  setActiveBtn('created');
+                }}
+                className={`${
+                  activeBtn === 'created' ? activeBtnStyles : notActiveBtnStyles
+                }`}
+              >
+                Created
+              </button>
+              <button
+                type='button'
+                onClick={e => {
+                  setText(e.target.textContent);
+                  setActiveBtn('saved');
+                }}
+                className={`${
+                  activeBtn === 'saved' ? activeBtnStyles : notActiveBtnStyles
+                }`}
+              >
+                Saved
+              </button>
+            </>
+          ) : (
+            <div className={`${activeBtnStyles} w-full rounded-none`}>
+              Posts
+            </div>
+          )}
         </div>
 
         {posts?.length ? (

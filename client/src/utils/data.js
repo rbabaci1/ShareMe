@@ -73,6 +73,9 @@ export const feedQuery = `*[_type == "post"] | order(_createdAt desc) {
     }
   },
       _id,
+      title, 
+      about,
+      category,
       destination,
       postedBy->{
         _id,
@@ -87,6 +90,15 @@ export const feedQuery = `*[_type == "post"] | order(_createdAt desc) {
           image
         },
       },
+      comments[]{
+        comment,
+        _key,
+        postedBy->{
+          _id,
+          userName,
+          image
+        },
+      }
     } `;
 
 export const postDetailQuery = postId => {

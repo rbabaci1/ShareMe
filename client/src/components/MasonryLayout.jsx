@@ -1,5 +1,4 @@
 import React from 'react';
-import { useSelector } from 'react-redux';
 import Masonry from 'react-masonry-css';
 import Post from './Post';
 
@@ -12,9 +11,7 @@ const breakpointColumnsObj = {
   500: 1,
 };
 
-const MasonryLayout = () => {
-  const posts = useSelector(state => state.posts);
-
+const MasonryLayout = ({ posts }) => {
   return posts?.length ? (
     <Masonry
       className='flex animate-slide-fwd mt-8'
