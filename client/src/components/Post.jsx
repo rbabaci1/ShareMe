@@ -3,15 +3,22 @@ import { Link, useNavigate } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
 import { MdDownloadForOffline } from 'react-icons/md';
 import { AiTwotoneDelete } from 'react-icons/ai';
-import { BsFillArrowUpRightCircleFill } from 'react-icons/bs';
+import {
+  BsFillArrowUpRightCircleFill,
+  BsSaveFill,
+  BsSave,
+} from 'react-icons/bs';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { client, urlFor } from '../client';
-import { addSavePost, removePost } from '../state';
+import { addSavePost, removePost, removePostSave } from '../state';
 
 const Post = ({ post: { postedBy, image, _id, destination, save } }) => {
   const [postHovered, setPostHovered] = useState(false);
   const [savingPost, setSavingPost] = useState(false);
+  const [unSavingPost, setUnSavingPost] = useState(false);
+  const [deletingPost, setDeletingPost] = useState(false);
+
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
@@ -21,9 +28,7 @@ const Post = ({ post: { postedBy, image, _id, destination, save } }) => {
     item => item?.postedBy?._id === User?.googleId
   )?.length;
 
-  const savePost = e => {
-    e.stopPropagation();
-
+  const savePost = () => {
     if (!alreadySaved) {
       setSavingPost(true);
       const _key = uuidv4();
@@ -61,9 +66,36 @@ const Post = ({ post: { postedBy, image, _id, destination, save } }) => {
     }
   };
 
+  const unSavePost = () => {
+    setUnSavingPost(true);
+
+    client
+      .patch(_id)
+      .unset([
+        `save[${save?.findIndex(
+          item => item?.postedBy?._id === User?.googleId
+        )}]`,
+      ])
+      .commit()
+      .then(() => {
+        dispatch(
+          removePostSave({
+            postId: _id,
+            saveIndex: save?.findIndex(
+              item => item?.postedBy?._id === User?.googleId
+            ),
+          })
+        );
+        setUnSavingPost(false);
+      });
+  };
+
   const deletePost = () => {
+    setDeletingPost(true);
+
     client.delete(_id).then(() => {
       dispatch(removePost({ postId: _id }));
+      setDeletingPost(false);
     });
   };
 
@@ -95,23 +127,13 @@ const Post = ({ post: { postedBy, image, _id, destination, save } }) => {
                 </a>
               </div>
 
-              {alreadySaved ? (
-                <button
-                  type='button'
-                  className='bg-red-500 opacity-70 hover:opacity-100 text-white font-bold px-5 py-1 text-base rounded-3xl hover:shadow-md outline-none'
-                >
-                  {save?.length ? save.length + ' Saved' : ''}
-                </button>
-              ) : (
-                <button
-                  onClick={savePost}
-                  type='button'
-                  className='bg-red-500 opacity-70 hover:opacity-100 text-white font-bold px-5 py-1 text-base rounded-3xl hover:shadow-md outline-none'
-                >
-                  {save?.length ? save.length : ''}
-                  {savingPost ? 'Saving' : 'Save'}
-                </button>
-              )}
+              <div className='bg-red-500 text-white font-bold px-5 py-1 text-base rounded-3xl'>
+                {save?.length
+                  ? save.length === 1
+                    ? '1 Save'
+                    : save.length + ' Saves'
+                  : '0 Saves'}
+              </div>
             </div>
 
             <div className=' flex justify-between items-center gap-2 w-full'>
@@ -127,34 +149,64 @@ const Post = ({ post: { postedBy, image, _id, destination, save } }) => {
                 </a>
               )}
 
-              {postedBy?._id === User?.googleId && (
-                <button
-                  type='button'
-                  onClick={e => {
-                    e.stopPropagation();
-                    deletePost();
-                  }}
-                  className='bg-white p-2 rounded-full w-8 h-8 flex items-center justify-center text-dark opacity-75 hover:opacity-100 outline-none'
-                >
-                  <AiTwotoneDelete />
-                </button>
-              )}
+              {postedBy?._id === User?.googleId &&
+                (deletingPost ? (
+                  <div className='text-red-600'>Deleting...</div>
+                ) : (
+                  <button
+                    type='button'
+                    onClick={e => {
+                      e.stopPropagation();
+                      deletePost();
+                    }}
+                    className='bg-white p-2 rounded-full w-8 h-8 flex items-center justify-center text-dark opacity-75 hover:opacity-100 outline-none'
+                  >
+                    <AiTwotoneDelete />
+                  </button>
+                ))}
             </div>
           </div>
         )}
       </div>
 
-      <Link
-        to={`/user_profile/${postedBy?._id}`}
-        className='flex gap-2 mt-1.5 mb-3.5 items-center hover:scale-105 transition-all duration-200 ease-in-out'
-      >
-        <img
-          className='w-8 h-8 rounded-full object-cover'
-          src={postedBy?.image}
-          alt='user-profile'
-        />
-        <p className='font-semibold capitalize'>{postedBy?.userName}</p>
-      </Link>
+      <div className='flex relative'>
+        <Link
+          to={`/user_profile/${postedBy?._id}`}
+          className='flex gap-2 mt-1.5 mb-3.5 items-center hover:scale-105 transition-all duration-200 ease-in-out'
+        >
+          <img
+            className='w-8 h-8 rounded-full object-cover'
+            src={postedBy?.image}
+            alt='user-profile'
+          />
+          <p className='font-semibold capitalize'>{postedBy?.userName}</p>
+        </Link>
+
+        <div
+          className='absolute cursor-pointer right-0 top-2.5'
+          onClick={e => {
+            e.stopPropagation();
+
+            if (alreadySaved) {
+              unSavePost();
+            } else {
+              savePost();
+            }
+          }}
+        >
+          {alreadySaved ? (
+            unSavingPost ? (
+              <div className='text-sm text-red-600'>UnSaving...</div>
+            ) : (
+              <BsSaveFill size={20} />
+            )
+          ) : savingPost ? (
+            <div className='text-sm text-red-600'>Saving...</div>
+          ) : (
+            <BsSave size={20} />
+          )}
+        </div>
+      </div>
     </div>
   );
 };

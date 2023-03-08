@@ -8,8 +8,8 @@ const Spinner = ({ message = '' }) => {
       style={{ height: '80vh' }}
     >
       <Circles
-        height='75'
-        width='75'
+        height='70'
+        width='70'
         color='#f04444'
         ariaLabel='circles-loading'
         visible={true}

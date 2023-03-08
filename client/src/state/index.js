@@ -44,6 +44,19 @@ export const authSlice = createSlice({
         return post;
       });
     },
+
+    removePostSave: (state, action) => {
+      const { postId, saveIndex } = action.payload;
+
+      state.posts = state.posts.map(post => {
+        if (post._id === postId) {
+          if (!post?.save) post.save = [];
+          post.save.splice(saveIndex, 1);
+        }
+
+        return post;
+      });
+    },
     removePost: (state, action) => {
       const { postId } = action.payload;
 
@@ -60,6 +73,7 @@ export const {
   addPostComment,
   addSavePost,
   removePost,
+  removePostSave,
 } = authSlice.actions;
 
 export default authSlice.reducer;
