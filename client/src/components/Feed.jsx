@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useLocation } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { client } from '../client';
@@ -28,6 +28,7 @@ const Feed = () => {
     } else {
       if (!posts.length) {
         setLoading(true);
+
         client.fetch(feedQuery).then(data => {
           dispatch(setPosts(data));
 
