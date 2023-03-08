@@ -15,8 +15,6 @@ const Home = () => {
 
   const User = useSelector(state => state.user);
 
-  // eslint-disable-line react-hooks/exhaustive-deps
-
   useEffect(() => {
     if (User) {
       scrollRef.current.scrollTo(0, 0);
@@ -46,7 +44,7 @@ const Home = () => {
 
             <Link to={`user_profile/${User?.googleId}`}>
               <img
-                src={User?.image}
+                src={User?.imageUrl}
                 alt='user-pic'
                 className='w-10 h-10 mr-4 rounded-full '
               />

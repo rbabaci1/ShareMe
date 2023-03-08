@@ -100,7 +100,7 @@ const Post = ({ post: { postedBy, image, _id, destination, save } }) => {
                   type='button'
                   className='bg-red-500 opacity-70 hover:opacity-100 text-white font-bold px-5 py-1 text-base rounded-3xl hover:shadow-md outline-none'
                 >
-                  {save?.length} Saved
+                  {save?.length ? save.length + ' Saved' : ''}
                 </button>
               ) : (
                 <button
@@ -108,7 +108,8 @@ const Post = ({ post: { postedBy, image, _id, destination, save } }) => {
                   type='button'
                   className='bg-red-500 opacity-70 hover:opacity-100 text-white font-bold px-5 py-1 text-base rounded-3xl hover:shadow-md outline-none'
                 >
-                  {save?.length} {savingPost ? 'Saving' : 'Save'}
+                  {save?.length ? save.length : ''}
+                  {savingPost ? 'Saving' : 'Save'}
                 </button>
               )}
             </div>

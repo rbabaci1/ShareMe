@@ -170,7 +170,7 @@ const PostDetail = () => {
             <div className='flex flex-wrap mt-6 gap-3'>
               <Link to={`/user_profile/${User?._id}`}>
                 <img
-                  src={User?.image}
+                  src={User?.imageUrl}
                   className='w-10 h-10 rounded-full cursor-pointer'
                   alt='user-profile'
                 />

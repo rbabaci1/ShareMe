@@ -201,7 +201,7 @@ const CreatePost = () => {
               className='flex gap-2 mt-1.5 mb-3.5 items-center hover:scale-105 transition-all duration-200 ease-in-out'
             >
               <img
-                src={User?.image}
+                src={User?.imageUrl}
                 className='w-10 h-10 rounded-full'
                 alt='user-profile'
               />
