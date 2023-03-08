@@ -66,6 +66,11 @@ export const categories = [
   },
 ];
 
+export const userQuery = userId => {
+  const query = `*[_type == "user" && _id == '${userId}']`;
+  return query;
+};
+
 export const feedQuery = `*[_type == "post"] | order(_createdAt desc) {
   image{
     asset->{
@@ -101,8 +106,40 @@ export const feedQuery = `*[_type == "post"] | order(_createdAt desc) {
       }
 }`;
 
-export const userQuery = userId => {
-  const query = `*[_type == "user" && _id == '${userId}']`;
+export const postDetailQuery = postId => {
+  const query = `*[_type == "post" && _id == '${postId}']{
+    image{
+      asset->{
+        url
+      }
+    },
+    _id,
+    title, 
+    about,
+    category,
+    destination,
+    postedBy->{
+      _id,
+      userName,
+      image
+    },
+   save[]{
+      postedBy->{
+        _id,
+        userName,
+        image
+      },
+    },
+    comments[]{
+      comment,
+      _key,
+      postedBy->{
+        _id,
+        userName,
+        image
+      },
+    }
+  }`;
   return query;
 };
 

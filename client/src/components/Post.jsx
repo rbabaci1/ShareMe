@@ -4,14 +4,16 @@ import { v4 as uuidv4 } from 'uuid';
 import { MdDownloadForOffline } from 'react-icons/md';
 import { AiTwotoneDelete } from 'react-icons/ai';
 import { BsFillArrowUpRightCircleFill } from 'react-icons/bs';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
 import { client, urlFor } from '../client';
+import { addSavePost, removePost } from '../state';
 
 const Post = ({ post: { postedBy, image, _id, destination, save } }) => {
   const [postHovered, setPostHovered] = useState(false);
   const [savingPost, setSavingPost] = useState(false);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const User = useSelector(state => state.user);
 
@@ -24,13 +26,14 @@ const Post = ({ post: { postedBy, image, _id, destination, save } }) => {
 
     if (!alreadySaved) {
       setSavingPost(true);
+      const _key = uuidv4();
 
       client
         .patch(_id)
         .setIfMissing({ save: [] })
         .insert('after', 'save[-1]', [
           {
-            _key: uuidv4(),
+            _key,
             userId: User?.googleId,
             postedBy: {
               _type: 'postedBy',
@@ -40,16 +43,27 @@ const Post = ({ post: { postedBy, image, _id, destination, save } }) => {
         ])
         .commit()
         .then(() => {
+          dispatch(
+            addSavePost({
+              postId: _id,
+              save: {
+                _key,
+                postedBy: {
+                  image: User?.imageUrl,
+                  userName: User?.name,
+                  _id: User?.googleId,
+                },
+              },
+            })
+          );
           setSavingPost(false);
         });
     }
   };
 
-  const deletePost = e => {
-    e.stopPropagation();
-
+  const deletePost = () => {
     client.delete(_id).then(() => {
-      window.location.reload();
+      dispatch(removePost({ postId: _id }));
     });
   };
 
@@ -115,7 +129,10 @@ const Post = ({ post: { postedBy, image, _id, destination, save } }) => {
               {postedBy?._id === User?.googleId && (
                 <button
                   type='button'
-                  onClick={deletePost}
+                  onClick={e => {
+                    e.stopPropagation();
+                    deletePost();
+                  }}
                   className='bg-white p-2 rounded-full w-8 h-8 flex items-center justify-center text-dark opacity-75 hover:opacity-100 outline-none'
                 >
                   <AiTwotoneDelete />

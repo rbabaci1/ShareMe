@@ -1,13 +1,19 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { AiOutlineCloudUpload } from 'react-icons/ai';
 import { MdDelete } from 'react-icons/md';
+import { useSelector, useDispatch } from 'react-redux';
 
-import { categories } from '../utils/data';
+import { categories, postDetailQuery } from '../utils/data';
 import { client } from '../client';
 import Spinner from './Spinner';
+import { createPost } from '../state';
 
-const CreatePost = ({ user }) => {
+const CreatePost = () => {
+  const User = useSelector(state => state.user);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
   const [title, setTitle] = useState('');
   const [about, setAbout] = useState('');
   const [destination, setDestination] = useState('');
@@ -18,8 +24,6 @@ const CreatePost = ({ user }) => {
   const [isWrongImageType, setIsWrongImageType] = useState(false);
   const [loading, setLoading] = useState(false);
   const [savingPost, setSavingPost] = useState(false);
-
-  const navigate = useNavigate();
 
   const uploadImage = e => {
     const selectedFile = e.target.files[0];
@@ -63,7 +67,7 @@ const CreatePost = ({ user }) => {
         about,
         destination,
         category,
-        userId: user._id,
+        userId: User.googleId,
         image: {
           _type: 'image',
           asset: {
@@ -73,13 +77,21 @@ const CreatePost = ({ user }) => {
         },
         postedBy: {
           _type: 'postedBy',
-          _ref: user._id,
+          _ref: User.googleId,
         },
       };
 
-      client.create(document).then(() => {
-        navigate('/');
-        setSavingPost(false);
+      client.create(document).then(({ _id }) => {
+        const query = postDetailQuery(_id);
+
+        if (query) {
+          client.fetch(query).then(data => {
+            dispatch(createPost(data[0]));
+
+            navigate('/');
+            setSavingPost(false);
+          });
+        }
       });
     } else {
       setFields(true);
@@ -183,16 +195,19 @@ const CreatePost = ({ user }) => {
             className='outline-none text-2xl sm:text-3xl font-bold border-b-2 border-gray-200 p-2'
           />
 
-          {user && (
-            <div className='flex gap-2 mt-2 mb-2 items-center bg-white rounded-lg '>
+          <div className='flex gap-2 mt-2 mb-2 items-center bg-white rounded-lg '>
+            <Link
+              to={`/user_profile/${User?.googleId}`}
+              className='flex gap-2 mt-1.5 mb-3.5 items-center hover:scale-105 transition-all duration-200 ease-in-out'
+            >
               <img
-                src={user.image}
+                src={User?.image}
                 className='w-10 h-10 rounded-full'
                 alt='user-profile'
               />
-              <p className='font-bold'>{user.userName}</p>
-            </div>
-          )}
+              <p className='font-bold'>{User?.name}</p>
+            </Link>
+          </div>
 
           <input
             type='text'
@@ -244,7 +259,7 @@ const CreatePost = ({ user }) => {
                 onClick={savePost}
                 className='bg-red-500 text-white font-bold p-2 rounded-full w-28 outline-none'
               >
-                Save Post
+                {savingPost ? 'Saving...' : 'Save'}
               </button>
             </div>
           </div>
