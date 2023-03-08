@@ -40,7 +40,6 @@ const Post = ({ post: { postedBy, image, _id, destination, save } }) => {
         ])
         .commit()
         .then(() => {
-          window.location.reload();
           setSavingPost(false);
         });
     }

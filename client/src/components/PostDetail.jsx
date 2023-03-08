@@ -6,41 +6,45 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { client, urlFor } from '../client';
 import MasonryLayout from './MasonryLayout';
-import { relatedPostsQuery, postDetailQuery } from '../utils/data';
 import Spinner from './Spinner';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import { addPostComment } from '../state';
 
 const PostDetail = () => {
   const { postId } = useParams();
   const User = useSelector(state => state.user);
   const posts = useSelector(state => state.posts);
+  const dispatch = useDispatch();
 
   const [filteredPosts, setFilteredPosts] = useState([]);
   const [postDetails, setPostDetails] = useState(null);
   const [comment, setComment] = useState('');
   const [addingComment, setAddingComment] = useState(false);
 
-  const findSelectedPost = () => {
-    const postDetails = posts.find(post => post._id === postId);
-    setPostDetails(postDetails);
-  };
-
-  const findRelatedPosts = () => {
-    const relatedPosts = posts.filter(
-      post => post?.postedBy?._id === postDetails?.postedBy?._id
-    );
-
-    setFilteredPosts(relatedPosts);
-  };
-
   useEffect(() => {
+    const findSelectedPost = () => {
+      const postDetails = posts.find(post => post._id === postId);
+      setPostDetails(postDetails);
+    };
+
+    const findRelatedPosts = () => {
+      const relatedPosts = posts.filter(
+        post =>
+          post?.postedBy?._id === postDetails?.postedBy?._id &&
+          post?._id !== postDetails?._id
+      );
+
+      setFilteredPosts(relatedPosts);
+    };
+
     findSelectedPost();
     findRelatedPosts();
-  }, [postId]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [postId, posts, postDetails?._id, postDetails?.postedBy?._id]);
 
   const addComment = () => {
     if (comment) {
       setAddingComment(true);
+      const _key = uuidv4();
 
       client
         .patch(postId)
@@ -48,13 +52,26 @@ const PostDetail = () => {
         .insert('after', 'comments[-1]', [
           {
             comment,
-            _key: uuidv4(),
-            postedBy: { _type: 'postedBy', _ref: User?._id },
+            _key,
+            postedBy: { _type: 'postedBy', _ref: User?.googleId },
           },
         ])
         .commit()
         .then(() => {
-          // fetchPostDetails();
+          dispatch(
+            addPostComment({
+              postId: postDetails._id,
+              comment: {
+                comment,
+                _key,
+                postedBy: {
+                  image: User?.imageUrl,
+                  userName: User?.name,
+                  _id: User?.googleId,
+                },
+              },
+            })
+          );
           setComment('');
           setAddingComment(false);
         });

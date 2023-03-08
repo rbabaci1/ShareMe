@@ -1,37 +1,36 @@
 import React, { useEffect, useState } from 'react';
 
 import MasonryLayout from './MasonryLayout';
-import { client } from '../client';
-import { feedQuery, searchQuery } from '../utils/data';
 import Spinner from './Spinner';
+import { useSelector } from 'react-redux';
 
 const Search = ({ searchTerm }) => {
-  const [posts, setPosts] = useState(null);
+  const posts = useSelector(state => state.posts);
+  const [filteredPosts, setFilteredPost] = useState([]);
+
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (searchTerm !== '') {
-      setLoading(true);
-      const query = searchQuery(searchTerm.toLowerCase());
-
-      client.fetch(query).then(data => {
-        setPosts(data);
-        setLoading(false);
-      });
+    if (searchTerm === '') {
+      setFilteredPost(posts);
     } else {
-      client.fetch(feedQuery).then(data => {
-        setPosts(data);
-        setLoading(false);
-      });
+      setLoading(true);
+
+      const res = posts.filter(post =>
+        post.title.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+      setFilteredPost(res);
+
+      setLoading(false);
     }
-  }, [searchTerm]);
+  }, [searchTerm, posts]);
 
   return (
     <div className='mt-24'>
       {loading ? (
         <Spinner message='Searching pins' />
-      ) : posts?.length ? (
-        <MasonryLayout posts={posts} />
+      ) : filteredPosts?.length ? (
+        <MasonryLayout posts={filteredPosts} />
       ) : (
         <h2 className='mt-10 text-center text-2xl'>No Posts Found!</h2>
       )}
