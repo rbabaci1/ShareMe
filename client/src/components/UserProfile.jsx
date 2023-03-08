@@ -3,11 +3,7 @@ import { AiOutlineLogout } from 'react-icons/ai';
 import { useParams, useNavigate } from 'react-router-dom';
 import { GoogleLogout } from 'react-google-login';
 
-import {
-  userCreatedPostsQuery,
-  userQuery,
-  userSavedPostsQuery,
-} from '../utils/data';
+import { userQuery } from '../utils/data';
 import { client } from '../client';
 import MasonryLayout from './MasonryLayout';
 import Spinner from './Spinner';
@@ -23,7 +19,7 @@ const randomImage =
 
 const UserProfile = () => {
   const [user, setUser] = useState(null);
-  const [posts, setPosts] = useState(null);
+  const [filteredPosts, setFilteredPosts] = useState([]);
   const [text, setText] = useState('Created');
   const [activeBtn, setActiveBtn] = useState('created');
 
@@ -31,6 +27,7 @@ const UserProfile = () => {
   const dispatch = useDispatch();
   const { userId } = useParams();
   const loggedInUser = useSelector(state => state.user);
+  const posts = useSelector(state => state.posts);
 
   useEffect(() => {
     const query = userQuery(userId);
@@ -42,19 +39,19 @@ const UserProfile = () => {
 
   useEffect(() => {
     if (text === 'Created') {
-      const createdPostsQuery = userCreatedPostsQuery(userId);
+      const res = posts?.filter(post => post.postedBy._id === userId);
 
-      client.fetch(createdPostsQuery).then(data => {
-        setPosts(data);
-      });
+      setFilteredPosts(res);
     } else {
-      const savedPostsQuery = userSavedPostsQuery(userId);
-
-      client.fetch(savedPostsQuery).then(data => {
-        setPosts(data);
+      const res = posts?.filter(post => {
+        return post
+          ? post?.save?.some(save => save.postedBy._id === userId)
+          : [];
       });
+
+      setFilteredPosts(res);
     }
-  }, [text, userId]);
+  }, [posts, text, userId]);
 
   const logout = () => {
     dispatch(setLogout());
@@ -141,9 +138,9 @@ const UserProfile = () => {
           )}
         </div>
 
-        {posts?.length ? (
+        {filteredPosts?.length ? (
           <div className='px-2'>
-            <MasonryLayout posts={posts} />
+            <MasonryLayout posts={filteredPosts} />
           </div>
         ) : (
           <h2 className='flex justify-center items-center text-2xl'>

@@ -13,31 +13,29 @@ import { useSelector } from 'react-redux';
 const PostDetail = () => {
   const { postId } = useParams();
   const User = useSelector(state => state.user);
-  const [posts, setPosts] = useState(null);
-  const [postDetail, setPostDetail] = useState(null);
+  const posts = useSelector(state => state.posts);
+
+  const [filteredPosts, setFilteredPosts] = useState([]);
+  const [postDetails, setPostDetails] = useState(null);
   const [comment, setComment] = useState('');
   const [addingComment, setAddingComment] = useState(false);
 
-  const fetchPostDetails = () => {
-    let query = postDetailQuery(postId);
+  const findSelectedPost = () => {
+    const postDetails = posts.find(post => post._id === postId);
+    setPostDetails(postDetails);
+  };
 
-    if (query) {
-      client.fetch(`${query}`).then(data => {
-        setPostDetail(data[0]);
+  const findRelatedPosts = () => {
+    const relatedPosts = posts.filter(
+      post => post?.postedBy?._id === postDetails?.postedBy?._id
+    );
 
-        if (data[0]) {
-          query = relatedPostsQuery(data[0]);
-
-          client.fetch(query).then(res => {
-            setPosts(res);
-          });
-        }
-      });
-    }
+    setFilteredPosts(relatedPosts);
   };
 
   useEffect(() => {
-    fetchPostDetails();
+    findSelectedPost();
+    findRelatedPosts();
   }, [postId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const addComment = () => {
@@ -56,20 +54,20 @@ const PostDetail = () => {
         ])
         .commit()
         .then(() => {
-          fetchPostDetails();
+          // fetchPostDetails();
           setComment('');
           setAddingComment(false);
         });
     }
   };
 
-  if (!postDetail) {
+  if (!postDetails) {
     return <Spinner message='Loading post...' />;
   }
 
   return (
     <>
-      {postDetail && (
+      {postDetails && (
         <div
           className='flex xl:flex-row flex-col m-auto bg-white'
           style={{
@@ -81,7 +79,7 @@ const PostDetail = () => {
           <div className='flex justify-center items-center md:items-start flex-initial'>
             <img
               className='lg:rounded-2xl sm:rounded-t-2xl'
-              src={postDetail.image && urlFor(postDetail.image).url()}
+              src={postDetails?.image && urlFor(postDetails?.image).url()}
               alt='user-post'
             />
           </div>
@@ -90,7 +88,7 @@ const PostDetail = () => {
             <div className='flex items-center justify-between'>
               <div className='flex gap-2 items-center'>
                 <a
-                  href={`${postDetail?.image.asset.url}?dl=`}
+                  href={`${postDetails?.image.asset.url}?dl=`}
                   download
                   className='bg-secondaryColor p-2 text-xl rounded-full flex items-center justify-center text-dark opacity-75 hover:opacity-100'
                 >
@@ -99,39 +97,39 @@ const PostDetail = () => {
               </div>
 
               <a
-                href={postDetail?.destination}
+                href={postDetails?.destination}
                 target='_blank'
                 rel='noreferrer'
                 className='bg-gray-100 flex items-center gap-2 text-black font-bold p-1 pl-4 pr-4 rounded-full opacity-70 hover:opacity-100 hover:shadow-md'
               >
                 <BsFillArrowUpRightCircleFill />
-                {postDetail?.destination?.slice(8, 28)} ...
+                {postDetails?.destination?.slice(8, 28)} ...
               </a>
             </div>
 
             <div>
               <h1 className='text-4xl font-bold break-words mt-3'>
-                {postDetail?.title}
+                {postDetails?.title}
               </h1>
-              <p className='mt-3'>{postDetail?.about}</p>
+              <p className='mt-3'>{postDetails?.about}</p>
             </div>
 
             <Link
-              to={`/user_profile/${postDetail?.postedBy._id}`}
+              to={`/user_profile/${postDetails?.postedBy._id}`}
               className='flex gap-2 mt-5 items-center bg-white rounded-lg '
             >
               <img
-                src={postDetail?.postedBy.image}
+                src={postDetails?.postedBy.image}
                 className='w-10 h-10 rounded-full'
                 alt='user-profile'
               />
-              <p className='font-bold'>{postDetail?.postedBy.userName}</p>
+              <p className='font-bold'>{postDetails?.postedBy.userName}</p>
             </Link>
 
             <h2 className='mt-5 text-2xl'>Comments</h2>
 
             <div className='max-h-370 overflow-y-auto'>
-              {postDetail?.comments?.map(item => (
+              {postDetails?.comments?.map(item => (
                 <div
                   className='flex gap-2 mt-5 items-center bg-white rounded-lg'
                   key={item.comment}
@@ -184,14 +182,10 @@ const PostDetail = () => {
         More like this
       </h1>
 
-      {posts ? (
-        posts.length ? (
-          <MasonryLayout posts={posts} />
-        ) : (
-          <h2>No matching posts :(</h2>
-        )
+      {filteredPosts.length ? (
+        <MasonryLayout posts={filteredPosts} />
       ) : (
-        <Spinner message='Loading more posts' />
+        <h2 className='text-center text-2xl pt-5 pb-5'>No matching posts :(</h2>
       )}
     </>
   );

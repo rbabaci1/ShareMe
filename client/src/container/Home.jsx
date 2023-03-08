@@ -5,35 +5,25 @@ import { Link, Route, Routes } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 
 import { Sidebar, UserProfile } from '../components';
-import { userQuery } from '../utils/data';
-import { client } from '../client';
 import Posts from './Posts';
 import logo from '../assets/logo.png';
 import Spinner from '../components/Spinner';
 
 const Home = () => {
   const [toggleSidebar, setToggleSidebar] = useState(false);
-  const [user, setUser] = useState(null);
   const scrollRef = useRef(null);
 
   const User = useSelector(state => state.user);
 
-  useEffect(() => {
-    const userId = User?.googleId;
-    const query = userQuery(userId);
-
-    client.fetch(query).then(data => {
-      setUser(data[0]);
-    });
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
-    if (user) {
+    if (User) {
       scrollRef.current.scrollTo(0, 0);
     }
   });
 
-  if (user) {
+  if (User) {
     return (
       <div className='flex bg-gray-50 md:flex-row flex-col h-screen transition-height duration-75 ease-out'>
         {/* Desktop sidebar */}
@@ -54,9 +44,9 @@ const Home = () => {
               <img src={logo} alt='logo' className='w-28' />
             </Link>
 
-            <Link to={`user_profile/${user?._id}`}>
+            <Link to={`user_profile/${User?.googleId}`}>
               <img
-                src={user.image}
+                src={User?.image}
                 alt='user-pic'
                 className='w-10 h-10 mr-4 rounded-full '
               />
